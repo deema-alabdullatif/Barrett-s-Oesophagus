@@ -1,0 +1,58 @@
+function[train,test,x,y]= ReadZoom(file,zoom)
+%this function reads: URLs files , and the desired zoom lecel
+
+%specify the range of the excel file in my case 1:403 and the sheet number
+range='A1:A403';
+sheet=1;
+
+[~, ~, URLs] = xlsread(file,sheet,range );
+
+
+%read the trainig data
+train=cell(size(URLs,1));
+
+x=1;
+y=1;
+%read the one url at a time
+for ind=1:size(URLs,1)
+    %load the patch
+    url1=URLs{ind,1};
+    C = textscan(url1, '%s', 'Delimiter', '+;?');
+    
+    train{ind}=acquire_url_at_specific_scale(C{1,1}{1,1},str2num(C{1,1}{3,1}),str2num(C{1,1}{2,1}),str2num(C{1,1}{5,1}),str2num(C{1,1}{4,1}),100,zoom);
+    if size(train{ind},1)>x
+        x=size(train{ind},1);
+    end
+    
+    if size(train{ind},1)>y
+        y=size(train{ind},2);
+    end
+    
+end
+
+%--------------------------------------
+%REad the test data
+range='A1:A30';
+sheet=3;
+
+
+[~, ~, URLs2] = xlsread(file,sheet,range );
+test=cell(size(URLs2,1));
+for ind=1:size(URLs2,1)
+    %load the patch
+    url1=URLs2{ind,1};
+    C = textscan(url1, '%s', 'Delimiter', '+;?');
+    
+    test{ind}=acquire_url_at_specific_scale(C{1,1}{1,1},str2num(C{1,1}{3,1}),str2num(C{1,1}{2,1}),str2num(C{1,1}{5,1}),str2num(C{1,1}{4,1}),100,zoom);
+    
+    if size(test{ind},1)>x
+        x=size(test{ind},1);
+    end
+    
+    if size(test{ind},1)>y
+        y=size(test{ind},2);
+    end
+end
+
+end
+
