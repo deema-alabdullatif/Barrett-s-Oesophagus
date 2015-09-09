@@ -1,0 +1,18 @@
+function pooledMap = maxpool( map, mapDim, poolDim )
+ 
+ pooledMap=zeros(mapDim/poolDim,mapDim/poolDim);
+ indR=1;
+ indC=1;
+
+for row=1:poolDim:mapDim-poolDim+1
+ for col=1:poolDim:mapDim-poolDim+1
+
+ max(max(
+    pooledMap(indR,indC)= max(max(ap(row:row+poolDim-1,col:col+poolDim-1)));
+indC=indC+1;
+ end
+ indC=1;
+ indR=indR+1;
+
+
+end
