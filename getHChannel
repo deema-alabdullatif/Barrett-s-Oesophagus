@@ -1,0 +1,16 @@
+function [ hchannel, echannel ] = getHChannel( images )
+%this function take RGB image and apply colour deconvolution on it
+%to get the h and e channel
+
+% the opticad density for H&E
+  v1=  [ 0.6446  ,  0.7167    ,0.2662];
+  v2 = [0.0905   , 0.9553    ,0.2816];  
+  v3 =-[0.0913   ,-0.2736   , 0.9575]; 
+  
+  
+  %Colour Deconvolution
+  [  mCDC ]   = coldtmp( mIn,v1,v2,v3)
+  
+  hchannel=mCDC(:,:,1);
+  echannel=mCDC(:,:,2);
+end
