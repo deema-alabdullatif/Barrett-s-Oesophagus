@@ -1,0 +1,68 @@
+function [  mCDC ]   = coldtmp( mIn,v1,v2,v3)
+% do colour deconvolution, [Ruifrok&Johnston 2001] 
+% Duane 22/07/13 
+% Original syntax attempted to read in string from a struct to provide
+% refernce colours. Another function, OD_of_stain allowed the stain names to be read
+% in and stored reference values for them to be retreived.  
+
+
+  
+M      = [v1;v2;v3];
+
+% MX      = MX.*repmat([1/sum(MX(1,:)),1/sum(MX(2,:)),1/sum(MX(3,:))]', 1,3);  % normalize MX
+
+mIn     = double(mIn);
+sz      = size( mIn );   
+mCDC    = zeros(sz);
+
+% 
+%     M       = inv( MX );
+%     
+    
+cosx(1)=M(1,1);
+cosx(2)=M(1,2);
+cosx(3)=M(1,3);
+cosy(1)=M(2,1);
+cosy(2)=M(2,2);
+cosy(3)=M(2,3);
+cosz(1)=M(3,1);
+cosz(2)=M(3,2);
+cosz(3)=M(3,3);
+A = cosy(2) - cosx(2) * cosy(1) / cosx(1);
+V = cosz(2) - cosx(2) * cosz(1) / cosx(1);
+	
+C = cosz(3) - cosy(3) * V/A + cosx(3) * (V/A * cosy(1) / cosx(1) - cosz(1) / cosx(1));
+	q(3) = (-cosx(3) / cosx(1) - cosx(3) / A * cosx(2) / cosx(1) * cosy(1) / cosx(1) + cosy(3) / A * cosx(2) / cosx(1)) / C;
+	q(2) = -q(3) * V / A - cosx(2) / (cosx(1) * A);
+	q(1) = 1.0 / cosx(1) - q(2) * cosy(1) / cosx(1) - q(3) * cosz(1) / cosx(1);
+	q(6) = (-cosy(3) / A + cosx(3) / A * cosy(1) / cosx(1)) / C;
+	q(5) = -q(6) * V / A + 1.0 / A;
+	q(4) = -q(5) * cosy(1) / cosx(1) - q(6) * cosz(1) / cosx(1);
+	q(9) = 1.0 / C;
+	q(8) = -q(9) * V / A;
+	q(7) = -q(8) * cosy(1) / cosx(1) - q(9) * cosz(1) / cosx(1);
+    % evaluate correlation between input image and the reference color vectors
+	
+    M(1,1)=q(1);M(1,2)=q(2);M(1,3)=q(3);M(2,1)=q(4);M(2,2)=q(5);M(2,3)=q(6);M(3,1)=q(7);M(3,2)=q(8);M(3,3)=q(9);
+    M;
+     V  = reshape( mIn, sz(1)*sz(2), 3);
+   
+    % colour deconvolution
+    fMax    = 255;    
+    vv      = (-(255*log(min(V, fMax)/fMax))/log(255));
+    vv=vv*M;
+    
+    % mCDC
+    for k = 1:size(vv,2)
+        mCDC(:,:,k) = reshape( vv(:,k), sz(1), sz(2));   
+        mCDC(:,:,k)=exp(-(mCDC(:,:,k)-255)*log(255)/255);
+    end
+
+mCDC(mCDC==inf)=0;
+mCDC(mCDC==-inf)=0;
+mCDC(isnan(mCDC)==1)=0;
+    
+ mCDC(mCDC>255)=255;
+
+
+
