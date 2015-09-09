@@ -1,0 +1,83 @@
+function [I]=acquire_url_at_specific_scale(url,x0,y0,xl,yl,qual,scale)
+% % [I]=acquire_url_at_specific_scale('http://slides.virtualpathology.leeds.ac.uk/Research_1/Darren/Barretts/11013.svs',x,y,500,500,100,40);
+% % imshow(I)
+% this function will read in a url at a specific location and return the
+% region at a specific scale and quality
+
+% url = the url of interest
+% x0 = the intial x coordinate
+% y0= the initial y coordinate
+% xl= the length of x
+% yl = the length of y
+% qual = the desired quality
+% scale = the desired scale
+
+% first read in the information about the slide
+
+slide_info   = urlread([url, '?INFO']);
+% split slide info up by using the \ and + symbols as deliminators
+slide_strs   = regexp( slide_info, '\|+', 'split');
+% thake the first argument to be the cols
+N_COL   =  slide_strs{1};       % no. of cols in image
+% take the second argument to the rows
+N_ROW   = slide_strs {2};
+
+% do the same for scale
+z_str   = regexp( slide_strs{6},'\=+','split'); 
+N_SCA   = sscanf( z_str{2},'%d');  
+            
+
+% can only acquire 2000 by 2000 patches at a time
+
+xl=floor(scale*((x0+xl)./N_SCA));
+
+yl=floor(scale*((y0+yl)./N_SCA));
+x0=floor(scale*(x0./N_SCA));
+
+y0=floor(scale*(y0./N_SCA));
+
+
+
+tmp=max(xl-x0,yl-y0);
+
+if tmp<=2000
+img = imread([url,'?', num2str(y0), '+', num2str(x0), '+', num2str(abs(y0-yl)), '+', num2str(abs(x0-xl)), '+', num2str(round(N_SCA/scale)), '+', num2str(qual) ]);
+end
+
+if tmp>2000
+    
+    % have to read in images as patches
+   img=zeros((xl-x0),(yl-y0),3);
+    
+   tmpx=x0;
+   tmpy=y0;
+   h=1;
+   h2=1;
+    for i=1:2000:(xl-x0)
+        for j=1:2000:(yl-y0)
+            
+    tmp = imread([url,'?', num2str(tmpy), '+', num2str(tmpx), '+', num2str((2000)), '+', num2str((2000)), '+', num2str(round(N_SCA/scale)), '+', num2str(qual) ]);
+   
+    tmpx=(tmpx+(2000.*(h-1)));
+    tmpy=(tmpy+(2000.*(h2)));
+    
+    h=h+1;
+    h2=h2+1;
+    
+    img(i:i+1999,j:j+1999,:)=tmp;
+            
+        end
+        h=1;
+        tmpy=y0;
+        h2=1;
+    end
+    
+    img=img(1:(xl-x0),1:(yl-y0),:);
+    img=uint8(img);
+end
+    
+
+I=img;
+
+            
+            
