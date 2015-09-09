@@ -1,0 +1,26 @@
+function [ convolvedFeature ] = ActivationFunction( convolvedImage,type )
+%ActivationFunction Returns the rectification of the feature map
+%
+% Parameters:
+%  convolvedImage - convolved feature
+%  type - type of activation function 's' for sigmoid and 'r' for ReLu
+%
+% Returns:
+%  convolvedFeature - matrix of rectified feature
+
+switch type
+    case 's'
+        
+        %sigmoid
+        convolvedFeature = 1./(1+exp(-convolvedImage));
+        
+    case 'r'
+        
+        %relu
+        convolvedFeature =max(  convolvedImage ,0);
+        
+    otherwise
+        disp('Please specify the activation function!')
+end
+end
+
