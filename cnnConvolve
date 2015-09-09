@@ -1,0 +1,113 @@
+function convolvedFeatures = cnnConvolve(filterDim, numFilters, images, W, b,flag,filters1,filters2,type)
+%cnnConvolve Returns the convolution of the features given by W and b with
+%the given images
+%
+% Parameters:
+%  filterDim - filter (feature) dimension
+%  numFilters - number of feature maps
+%  images - large images to convolve with, matrix in the form
+%           images(r, c, image number) or feature maps from previous stage
+%  W, b - W, b weights and biases values
+%         W is of shape (filterDim,filterDim,numFilters)
+%         b is of shape (numFilters,1)
+%  flag - indicates wether the convolution for the first stage ore second
+%         stage
+%  filters1 - number of filter in the first stage
+%  filters2 - number of filters in the second stage
+%  type - type of activation function 's' for sigmoid and 'r' for ReLu
+%
+% Returns:
+%  convolvedFeatures - matrix of convolved features in the form
+%                      convolvedFeatures(imageRow, imageCol, featureNum, imageNum)
+
+
+%check in which stage the convolution is operating
+%to keep the order of the images
+if flag==1
+    %the number of the input
+    numImages = size(images, 3);
+    %input dimensions
+    imageDim = size(images, 1);
+    %the dimensions of the output
+    convDim = imageDim - filterDim + 1;
+    %Initialize the output matrix
+    convolvedFeatures = zeros(convDim, convDim, numFilters, numImages);
+    
+    % Instructions:
+    %   Convolve every filter with every image here to produce the
+    %   (imageDim - filterDim + 1) x (imageDim - filterDim + 1) x numFeatures x numImages
+    %   matrix convolvedFeatures, such that
+    %   convolvedFeatures(imageRow, imageCol, featureNum, imageNum) is the
+    %   value of the convolved featureNum feature for the imageNum image over
+    %   the region (imageRow, imageCol) to (imageRow + filterDim - 1, imageCol + filterDim - 1)
+    %
+    % Expected running times:
+    %   Convolving with 100 images should take less than 30 seconds
+    %   Convolving with 5000 images should take around 2 minutes
+    %   (So to save time when testing, you should convolve with less images, as
+    %   described earlier)
+    
+    
+    
+    for imageNum = 1:numImages
+        for filterNum = 1:numFilters
+            
+            % Obtain the feature (filterDim x filterDim) needed during the convolution
+            filter = squeeze(W(:,:,filterNum)); % W is of shape (filterDim,filterDim,numFilters)
+            
+            % Obtain the image
+            im = squeeze(images(:, :, imageNum));
+            
+            %convolve the image with the filter
+            %and apply the activation function on the resulted feature map
+            %type 's' sigmoid , 'r' ReLu
+            convolvedImage = convolve( convDim,filter,b(filterNum) ,im,type);
+            
+            convolvedFeatures(:, :, filterNum, imageNum) = convolvedImage;
+        end
+    end
+    %
+    % displayColorNetwork( filter);
+else
+    %the number of the input images
+    numImages = size(images, 4);
+    %the number of the patches in each image
+    patches=size(images, 3);
+    %the dimensions of the input
+    imageDim = size(images, 1);
+    %the dimensions of the output
+    convDim = imageDim - filterDim + 1;
+    
+    
+    %Initialize the output matrix
+    convolvedFeatures = zeros(convDim, convDim, filters2*filters1, numImages);
+    
+    
+    
+    for imageNum = 1:numImages
+        ind=1;
+        
+        for filterNum = 1:numFilters
+            for patch=1:patches
+                
+                
+                % Obtain the feature (filterDim x filterDim) needed during the convolution
+                filter = squeeze(W(:,:,filterNum)); % W is of shape (filterDim,filterDim,numFilters)
+                
+                % Obtain the image
+                im = squeeze(images(:, :,patch, imageNum));
+                
+                %convolve the image with the filter
+                %and apply the activation function on the resulted feature map
+                %type 's' sigmoid , 'r' ReLu
+                convolvedImage = convolve( convDim,filter,b(filterNum) ,im,type);
+                
+                
+                convolvedFeatures(:, :, ind, imageNum) = convolvedImage;
+                ind=ind+1;
+            end
+        end
+    end
+end
+
+
