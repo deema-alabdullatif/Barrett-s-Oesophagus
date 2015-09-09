@@ -1,0 +1,6 @@
+function dy = dsquash_from_squash( y )
+    %     PR = single(0.66666666);
+    %     PO = single(1.71593428);
+    %     dy = PR/PO * (PO - y).*(PO + y);
+    dy = 0.3885152680012119400 * ( 2.9444304532791183000 - y.^2 );
+end % of function dsquash_from_squash()
