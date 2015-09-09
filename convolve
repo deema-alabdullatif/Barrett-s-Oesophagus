@@ -1,0 +1,40 @@
+function [ convolvedImage ] = convolve( convDim,filter,bias ,im,type)
+%convolve Returns the convolution of the feature given by W and b with
+%the given input
+%
+% Parameters:
+%  convDim - the dimentions of the output feature
+%  filter - a specific mask
+%  bias - a specific bias value
+%  im - input image of feature map
+%  type - type of activation function 's' for sigmoid and 'r' for ReLu
+%
+% Returns:
+%  convolvedImage - matrix of convolved feature
+
+
+
+convolvedImage = zeros(convDim, convDim);
+
+% Flip the feature matrix because of the definition of convolution to
+% cancel the rotation that made by MATLAB conv2 built in function
+filter = rot90(squeeze(filter),2);
+
+
+
+% Convolve "filter" with "im", adding the result to convolvedImage
+% be sure to do a 'valid' convolution to skip pixels on the edges
+convolvedImage = convolvedImage + conv2(im,filter,'valid');
+
+% Add the bias unit
+% Then, apply the activation function to get the hidden activation
+convolvedImage = convolvedImage + bias;   
+
+%if the tpe 's' then apply sigmoid function, 
+%and if it is 'r' then apply rectificaation function
+convolvedImage = ActivationFunction( convolvedImage,type );
+
+
+
+end
+
